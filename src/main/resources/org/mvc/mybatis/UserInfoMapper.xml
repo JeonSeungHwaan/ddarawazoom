@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="org.mvc.mybatis.UserInfoMapper">
+	
+	<insert id="insertUserInfo" >
+		insert into tbl_user(id, pw, email, nick)
+			values(#{id} , #{pw} , #{email}, #{nick})
+	</insert>
+	
+	<select id="getUserInfoCount" resultType="int">
+		select count(*) from tbl_user where id=#{id} and pw=#{pw} and status != '탈퇴'
+	</select>
+	
+	<select id="getUserInfo" resultType="org.mvc.bean.UserInfoDTO">
+		select * from tbl_user where id = #{id}
+	</select>
+	
+	<select id="getCoachInfo" resultType="org.mvc.bean.CoachInfoDTO">
+		select * from tbl_coach where c_id = #{c_id}
+	</select>
+	
+	<!-- 로그인 카운트 -->
+	<insert id="loginCount">
+		insert into tbl_visitor(id)
+			values(#{id})
+	</insert>
+	
+	<insert id="coachLoginCount">
+		insert into tbl_visitor(c_id)
+			values(#{id})
+	</insert>
+	
+	<!-- 아이디 중복확인 -->
+	<select id="idCheck" resultType="int">
+		select count(*) from tbl_user where id = #{id}
+	</select>
+	
+	<select id="c_idCheck" resultType="int">
+		select count(*) from tbl_coach where c_id = #{c_id}
+	</select>
+	
+	<!-- 닉네임 중복확인 -->
+	<select id="nickCheck" resultType="int">
+		select count(*) from tbl_user where nick = #{nick}
+	</select>
+	
+	<select id="c_nickCheck" resultType="int">
+		select count(*) from tbl_coach where c_nick = #{c_nick}
+	</select>
+	
+	<!-- 아이디 찾기 -->
+	<select id="findId" resultType="String">
+		select id from tbl_user where name = #{name} and tel = #{tel}
+	</select>
+	
+	<!-- 이메일 인증 -->
+	<update id="emailTemp">
+		update tbl_user set
+			temp_pw = #{temp_pw}
+		where id = #{id} and email = #{email}
+	</update>
+	
+	<!-- 인증번호 체크 -->
+	<select id="emailCheck" resultType="Integer">
+		select count(*) from tbl_user
+			where id = #{id} and email = #{email} and temp_pw = #{temp_pw}
+	</select>
+	
+	<!-- 비밀번호 변경 -->
+	<update id="updatePw">
+		update tbl_user set
+			pw = #{pw}
+		where id = #{id} and email = #{email}
+	</update>
+	
+	<!-- 카카오 로그인 -->
+	<insert id="kakaoInsert">
+		insert into tbl_user(id, email, nick, img)
+			values(
+				#{id},
+				#{email},
+				#{nick},
+				#{img}
+			)
+	</insert>
+	
+	<select id="kakaoCheck" resultType="Integer"> 
+		select count(*) from tbl_user
+			where id = #{id}
+	</select>
+	
+	<!-- 네이버 로그인 -->
+	<insert id="naverInsert">
+		insert into tbl_user(id, email, nick, img)
+			values(
+				#{id},
+				#{email},
+				#{nick},
+				#{img}
+			)
+	</insert>
+	
+	<select id="naverCheck" resultType="Integer">
+		select count(*) from tbl_user
+			where id = #{id}
+	</select>
+	
+	<!-- 코치 로그인 -->
+	<select id="coachCheck" resultType="Integer">
+		select count(*) from tbl_coach where c_id = #{c_id} and c_pw = #{c_pw} and c_status = '코치'
+	</select>
+	
+	<!-- 코치 회원가입 -->
+	<insert id="coachInsert">
+		insert into tbl_coach(c_id, c_pw, c_name, c_nick, c_email, c_birth, c_gender, c_tel, company, c_time)
+			values(#{c_id}, #{c_pw}, #{c_name}, #{c_nick}, #{c_email}, #{c_birth}, #{c_gender}, #{c_tel}, #{company}, #{c_time})
+	</insert>
+	
+	<insert id="careerInsert">
+		insert into tbl_coach_career(c_id, specialty, career)
+			values(#{c_id}, #{specialty}, #{career})
+	</insert>
+	
+	<insert id="insertCertificate">
+		update tbl_coach_career set
+			certificate = #{certificate}
+		where c_id = #{c_id}
+	</insert>
+	
+	<update id="coachImgUpload">
+		update tbl_coach set
+			c_img = #{c_img}
+		where c_id = #{c_id}
+	</update>
+	
+	<!-- 코치 소개 페이지 -->
+	<select id="getAllCoach" resultType="org.mvc.bean.CoachInfoDTO">
+		select * from tbl_coach where c_status = '코치'
+	</select>
+	
+	<select id="coachInfo" resultType="org.mvc.bean.CoachInfoDTO">
+		select * from tbl_coach where c_id = #{c_id}
+	</select>
+	
+	<select id="coachCareer" resultType="org.mvc.bean.CoachCareerDTO">
+		select * from tbl_coach_career where c_id = #{c_id}
+	</select>
+	
+	<select id="getCoachClass" resultType="org.mvc.bean.ZoomDTO">
+		select * from tbl_coachClass where c_id = #{c_id}
+	</select>
+	
+	<!-- Q&A -->
+	<select id="getQnAList" resultType="org.mvc.bean.QnADTO">
+		<![CDATA[
+			select * from (
+				select q_num, writer, title, content, pin, ref, status, regdate, readcount, re_step, rownum r from(
+					select * from tbl_QnA order by ref asc, pin desc))
+			where r >= #{startRow} and r <= #{endRow} and status != '삭제' and re_step = 0
+		]]>
+	</select>
+	
+	<select id="getQnACount" resultType="Integer">
+		select count(*) from tbl_QnA where status != '삭제'
+	</select>
+	
+	<select id="getQnASearchList" resultType="org.mvc.bean.QnADTO">
+		<![CDATA[
+			select * from (
+				select q_num, writer, title, content, pin, ref, status, regdate, readcount, re_step, rownum r from(
+					select * from tbl_QnA where ${category} like '%'||#{input}||'%' order by ref asc, pin desc))
+			where r >= #{startRow} and r <= #{endRow} and status != '삭제' and re_step = 0
+		]]>
+	</select>
+	
+	<select id="getQnASearchCount" resultType="Integer">
+		select count(*) from tbl_QnA where ${category} like '%'||#{input}||'%' and status != '삭제'
+	</select>
+	
+	<select id="getMaxNumber" resultType="Integer">
+		select max(q_num) from tbl_QnA
+	</select>
+	
+	<select id="getContent" resultType="org.mvc.bean.QnADTO">
+		select * from tbl_QnA where ref = #{q_num}
+	</select>
+	
+	<insert id="insertQnA">
+		insert into tbl_QnA(q_num, writer, title, content, ref, re_step)
+			values(seq_QnA.nextVal, #{writer}, #{title}, #{content}, #{ref}, #{re_step})
+	</insert>
+	
+	<update id="readcountUp">
+		update tbl_QnA set
+			readcount = readcount + 1
+		where q_num = #{q_num}
+	</update>
+	
+	<update id="answerDone">
+		update tbl_QnA set
+			status = '답변 완료'
+		where q_num = #{q_num}
+	</update>
+	
+</mapper>
+
+
+
+
+
+
+

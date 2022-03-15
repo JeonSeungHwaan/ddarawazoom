@@ -1,0 +1,61 @@
+@charset "UTF-8";
+
+#container{
+	width: 1000px;
+	margin: 0 auto;
+	padding: 25px
+}
+
+#container h1{
+	text-align: left;
+	padding: 5px 5px 5px 15px;
+	color: #7B68EE;
+	border-left: 3px solid #7B68EE;
+	margin-bottom: 20px;
+}
+
+#partyRoom{
+	background-color: #F8F8FF;
+	border: 1px solid #7B68EE;
+	width: 1000px;
+	height: 700px;
+	overflow: auto;
+}
+
+.partyRoom .me{
+	color: 	#000000;
+	text-align: right;
+	font-size:	24px;
+}
+
+.partyRoom .others{
+	color: #DC143C;
+	text-align: left;
+	font-size: 24px;
+}
+
+#yourMsg{
+	display: none;
+}
+
+.msgImg{
+	width: 200px;
+	height: 200px;
+}
+
+.clearBoth{
+	clear: both;
+}
+
+.img{
+	float: right;
+}
+
+.input-group{
+	width:1000px;
+}
+
+#sendFileBtn , #sendBtn , #startBtn{
+	background-color: #7B68EE;
+	color: white;
+}

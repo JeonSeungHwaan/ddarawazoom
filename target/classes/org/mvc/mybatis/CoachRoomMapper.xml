@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mvc.mybatis.CoachRoomMapper">
+
+	<!-- 스케줄 관련 코드 시작 -->
+	<resultMap type="org.mvc.bean.ScheduleDTO" id="calMap"> 
+		<result property="start" column="start_time"/> 
+		<result property="end" column="end_time"/> 
+	</resultMap>
+	
+	<!-- 스케줄 정보 가져오기 -->
+	<select id="getAllSchedule" resultMap="calMap" resultType="org.mvc.bean.ScheduleDTO">
+		select * from tbl_calendar where c_id = #{c_id}
+	</select>
+
+	<!-- 스케줄 등록 -->
+	<insert id="insertSchedule" parameterType="org.mvc.bean.ScheduleDTO">
+		insert into tbl_calendar (id, m_id, c_id, title, start_time, end_time, color, c_nick)
+			values( 
+				seq_calendar.nextval,
+				#{m_id},
+				#{c_id},
+				#{title},
+				#{start},
+				#{end},
+				#{color},
+				#{c_nick}
+			)
+	</insert>
+
+	<!-- 스케줄 삭제 -->
+	<delete id="deleteSchedule">
+		delete tbl_calendar where id = #{id}
+	</delete>
+
+	<!-- 해당 번호의 스케줄 정보 가져오기 -->
+	<select id="getSchedule" resultMap="calMap" resultType="org.mvc.bean.ScheduleDTO">
+		select * from tbl_calendar where c_id = #{c_id} and id = #{id}
+	</select>
+
+	<!-- 스케줄 수정 -->
+	<update id="updateSchedule">
+		update tbl_calendar set
+			title = #{title},
+			m_id = #{m_id},
+			start_time = #{start},
+			end_time = #{end},
+			color = #{color},
+			c_nick = #{c_nick}
+		where id = #{id} and c_id = #{c_id}
+	</update>
+	<!-- 스케줄 관련 코드 종료 -->
+
+	<!-- 코치정보 관련 코드 시작 -->
+	<!-- 코치 정보 가져오기 -->
+	<select id="getCoachInfo" resultType="org.mvc.bean.CoachInfoDTO">
+		select * from tbl_coach where c_id = #{c_id}
+	</select>
+	
+	<!-- 코치 경력정보 가져오기 -->
+	<select id="getAllCareerInfo" resultType="org.mvc.bean.CoachCareerDTO">
+		select * from tbl_coach_career where c_id = #{c_id} order by num asc
+	</select>
+	
+	<!-- 해당 번호의 코치 경력 가져오기 -->
+	<select id="getCareerInfo" resultType="org.mvc.bean.CoachCareerDTO">
+		select * from tbl_coach_career where c_id = #{c_id} and num = #{num}
+	</select>
+	
+	<!-- 코치 정보 수정 -->
+	<update id="updateInfo">
+		update tbl_coach set
+			c_name = #{c_name},
+			c_nick = #{c_nick},
+			c_email = #{c_email},
+			c_birth = #{c_birth},
+			c_gender = #{c_gender}
+		where c_id = #{c_id}
+	</update>
+	
+	<!-- 코치 프로필 이미지 변경 -->
+	<update id="updateImg">
+		update tbl_coach set
+			c_img = #{c_img}
+		where c_id = #{c_id}
+	</update>
+	
+	<!-- 코치 경력정보 추가 등록 -->
+	<insert id="insertCareer">
+		insert into tbl_coach_career(num, c_id, specialty, career, certificate)
+			values(
+				seq_coach_career.nextval,
+				#{c_id},
+				#{specialty},
+				#{career},
+				#{certificate}
+			)
+	</insert>
+	
+	<!-- 코치 경력정보 수정 -->
+	<update id="updateCareer">
+		update tbl_coach_career set
+			specialty = #{specialty},
+			career = #{career},
+			certificate = #{certificate}
+		where c_id = #{c_id} and num = #{num}
+	</update>
+	
+	<!-- 코치 경력정보 삭제 -->
+	<delete id="deleteCareer">
+		delete tbl_coach_career where c_id = #{c_id} and num = #{num}
+	</delete>
+	
+	<!-- 코치 소개 수정 -->
+	<update id="updateItroduce">
+		update tbl_coach set
+			introduce = #{introduce}
+		where c_id = #{c_id}
+	</update>
+	<!-- 코치정보 관련 코드 종료 -->
+	
+	<!-- 리뷰관리 관련 코드 시작 -->
+	<!-- 해당 코치가 등록한 수업 정보 -->
+	<select id="getAllClass" resultType="org.mvc.bean.ZoomDTO">
+		<![CDATA[
+			select * from (
+				select num, c_id, title, intro, type, goal, tool, frequency, price, img, count, merchant_uid, status, c_nick, rownum r from (
+					select * from tbl_coachClass where c_id = #{c_id} order by num desc))
+			where r >= #{startRow} and r <= #{endRow}	
+		]]>
+	</select>
+	
+	<!-- 해당 코치가 등록한 수업 갯수 -->
+	<select id="getClassCount" resultType="Integer">
+		select count(*) from tbl_coachClass where c_id = #{c_id}
+	</select>
+	
+	<!-- 리뷰보기 버튼을 누른 수업 정보 -->
+	<select id="getClass" resultType="org.mvc.bean.ZoomDTO">
+		select * from tbl_coachClass where c_id = #{c_id} and num = #{num}
+	</select>
+	
+	<!-- 해당 수업에 작성된 리뷰 목록 -->
+	<select id="getReview" resultType="org.mvc.bean.ReviewDTO">
+		<![CDATA[
+			select * from (
+				select review_num, class_num, id, nick, title, content, grade, deleted, rownum r from (
+					select * from tbl_review where class_num = #{class_num} order by review_num desc))
+			where r >= #{startRow} and r <= #{endRow}	
+		]]>		
+	</select>
+	
+	<!-- 해당 수업의 모든 리뷰의 갯수 -->
+	<select id="reviewCount" resultType="Integer">
+		select count(*) from tbl_review where class_num = #{class_num}
+	</select>
+	
+	<!-- 코치룸 메인에 표기할 모든 수업에 달린 최신 리뷰 -->
+	<select id="getAllReview" resultType="org.mvc.bean.ReviewDTO">
+		<![CDATA[
+			select c.c_id, c.num, r.class_num, r.nick, r.title, r.content
+	    		from tbl_coachClass c, tbl_review r
+	        		where c.c_id = #{c_id} and c.num = r.class_num and rownum <= 10 order by r.review_num desc
+        ]]>
+	</select>
+	<!-- 리뷰관리 관련 코드 종료 -->
+	
+	<!-- 회원관리 관련 코드 시작 -->
+	<!-- 해당 수업에 신청한 모든회원 목록 -->
+	<select id="getApplyMember" resultType="org.mvc.bean.PaymentDTO">
+		select * from tbl_payment where c_num = #{c_num} and status = 'paid'
+	</select>
+	
+	<!-- 해당 수업에 신청한 회원 수 -->
+	<select id="applyMemberCount" resultType="Integer">
+		select count(*) from tbl_payment where c_num = #{c_num} and status = 'paid'
+	</select>
+	
+	<!-- 바디 프로필 리스트 데이터 가져오기 -->
+	<select id="bodyList" resultType="org.mvc.bean.BodyProfileDTO">
+		<![CDATA[
+		select * from(
+			select b_num, b_id, b_height, b_weight, b_muscle, b_bodyfat, b_shape, b_chest, b_waist, b_arm, b_thigh, b_hip, b_date, b_img, rownum r from( 
+			 	select * from tbl_bodyprofile order by b_date asc, rownum desc))
+		 	where b_id = #{b_id}
+		]]>
+	</select>
+	
+	<!-- 최근 바디 프로필 데이터 가져오기 -->
+	<select id="getBodyProfile" resultType="org.mvc.bean.BodyProfileDTO">
+		select * from tbl_bodyprofile
+			where b_id = #{b_id} and b_num = (
+				select max(b_num) from tbl_bodyprofile where b_id = #{b_id}
+			)
+	</select>
+	
+	<!-- 마이 프로필 데이터 가져오기 -->
+	<select id="getMyProfile" resultType="org.mvc.bean.UserInfoDTO">
+		select * from tbl_user where id = #{id}
+	</select>
+	<!-- 회원관리 관련 코드 종료 -->
+	
+	<!-- 매출 내역 가져오기 -->
+	<select id="getAmount" resultType="org.mvc.bean.PaymentDTO">
+		<![CDATA[
+			select * from tbl_payment
+				where c_id = #{c_id} and
+				status = 'paid' and
+				paidAt >= #{startDate} and
+				paidAt <= #{endDate}
+		]]>
+	</select>
+</mapper>

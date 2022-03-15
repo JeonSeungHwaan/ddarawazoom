@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mvc.mybatis.NoticeMapper">
+
+	<select id="getUserInfo" resultType="org.mvc.bean.UserInfoDTO">
+		select * from tbl_user where id = #{id}
+	</select>
+
+	<select id="getCoachInfo" resultType="org.mvc.bean.CoachInfoDTO">
+		select * from tbl_coach where c_id = #{c_id}
+	</select>
+
+	<!-- 공지 글 가져오기 -->
+	<select id="noticeList" resultType="org.mvc.bean.NoticeDTO">
+		<![CDATA[
+			select * from (
+				select num, title, content, writer_id, target_id, regdate, viewcnt, img, pin, rownum r from(
+					select * from tbl_notice order by pin desc , regdate desc))
+			where r > = #{startRow} and r <= #{endRow}
+		]]>
+	</select>
+	
+	<!-- 공지 글 수 -->
+	<select id="noticeCount" resultType="int">
+		select count(*) from tbl_notice
+	</select>
+	
+	<!-- 공지 글 작성 -->
+	<insert id="noticeWrite" parameterType="org.mvc.bean.NoticeDTO">
+		<![CDATA[
+			insert into tbl_notice(num, title, content, writer_id, target_id, pin, img) 
+				values(
+					seq_notice.nextval,
+					#{title},
+					#{content},
+					#{writer_id},
+					#{target_id},
+					#{pin},
+					#{img}
+				)
+			]]>
+	</insert>
+	
+	<!-- 관련 공지 글 출력 -->
+	<select id="getNotice" resultType="org.mvc.bean.NoticeDTO">
+		<![CDATA[
+			select * from tbl_notice where num = #{num}
+		]]>
+	</select>
+	
+	<!-- 공지 글 수정 -->
+	<update id="noticeUpdate">
+		<![CDATA[
+			update tbl_notice set
+				title = #{title},
+				content = #{content},
+				target_id = #{target_id},
+				pin = #{pin},
+				img = #{img}
+			where num = #{num}
+		]]>
+	</update>
+	
+	<!-- 공지 글 삭제 -->
+	<delete id="noticeDelete">
+		<![CDATA[
+			delete tbl_notice where num = #{num}
+		]]>
+	</delete>
+	
+	<!-- 공지 글 조회수 -->
+	<update id="noticeViewCount">
+		<![CDATA[
+			update tbl_notice set
+				viewcnt = viewcnt + 1
+			where num = #{num}
+		]]>
+	</update>
+	
+	<!-- 공지사항 댓글 작성 -->
+	<insert id="commentWrite" parameterType="org.mvc.bean.Notice_CDTO">
+		<![CDATA[
+			insert into tbl_notice_c(c_num, num, ref, writer_id, content)
+				values(seq_notice_c.nextval, #{num}, seq_notice_c.nextval, #{writer_id}, #{content})
+			]]>
+	</insert>
+	
+	<!-- 관련 공지사항 댓글 수 -->
+	<select id="commentCount" resultType="int">
+		<![CDATA[
+			select count(*) from tbl_notice_c where num = #{num} 
+		]]>
+	</select>
+	
+	<!-- 공지사항 댓글 리스트 -->
+	<select id="getCommentList" resultType="org.mvc.bean.Notice_CDTO">
+		<![CDATA[
+			select * from(
+				select c_num, num, writer_id, content, ref, re_step, re_level, deleted, regdate, rownum r from(
+					select * from tbl_notice_c where num = #{num} order by ref asc, re_step asc))
+				where r >= #{startRow} and r <= #{endRow}
+			]]>
+	</select>
+	
+	<!-- 공지사항 직접 댓글 삭제 -->
+	<update id="deletedChange">
+		update tbl_notice_c set
+			deleted = 'yes'
+		where c_num = #{c_num}
+	</update>
+	
+	<!-- 관리자 댓글 경고 취소 -->
+	<update id="commentDeletedCancell">
+		<![CDATA[
+			update tbl_notice_c set
+				deleted = 'no'
+			where c_num = #{c_num}
+		]]>
+	</update>
+		
+	<!-- 수정에 필요한 댓글 가져오기 -->
+	<select id="getComment" resultType="org.mvc.bean.Notice_CDTO">
+		<![CDATA[
+			select * from tbl_notice_c where c_num = #{c_num}
+		]]>
+	</select>
+	
+	<!-- 댓글 수정 -->
+	<update id="commentUpdate">
+		update tbl_notice_c set
+			content = #{content}
+		where c_num = #{c_num}
+	</update>
+	
+	<!-- 대댓글 작성 -->
+	<insert id="insertReComment">
+		<![CDATA[
+			insert into tbl_notice_c(c_num, num, writer_id, content, ref, re_step, re_level)
+				values(seq_notice_c.nextval, #{num}, #{writer_id}, #{content}, #{ref}, #{re_step}, #{re_level})
+			]]>
+	</insert>
+	
+	<!-- 관리자 페이지 관리용 모든 댓글 -->
+	<select id="getAllComment" resultType="org.mvc.bean.Notice_CDTO">
+		<![CDATA[
+			select * from(
+				select c_num, num, writer_id, content, ref, re_step, re_level, deleted, regdate, rownum r from(
+					select * from tbl_notice_c order by c_num asc, ref asc))
+				where r >= #{startRow} and r <= #{endRow}
+			]]>
+	</select>
+	
+	<!-- 관리자 페이지 모든 댓글 수 -->
+	<select id="getcommentCount" resultType="int">
+		<![CDATA[
+			select count(*) from tbl_notice_c
+		]]>
+	</select>
+	
+	<!-- 공지사항 검색 리스트 -->
+	<select id="searchNoticeList" resultType="org.mvc.bean.NoticeDTO">
+		<![CDATA[
+			select * from (
+				select num, title, content, writer_id, target_id, regdate, viewcnt, img, pin, rownum r from(
+					select * from tbl_notice  where ${category} like '%'||#{input}||'%' order by pin desc , regdate desc))
+			where r >= #{startRow} and r <= #{endRow}
+		]]>
+	</select>
+	
+	<!-- 공시사항 검색 결과 수 -->
+	<select id="searchCount" resultType="int">
+		select count(*) from tbl_notice where ${category} like '%'||#{input}||'%'
+	</select>
+	
+	<!-- 관리자 댓글 검색 -->
+	<select id="searchCommentList" resultType="org.mvc.bean.Notice_CDTO">
+		<![CDATA[
+			select * from (
+				select c_num, num, writer_id, content, ref, re_step, re_level, deleted, regdate, rownum r from(
+					select * from tbl_notice_c where ${category} like '%'||#{input}||'%' order by regdate desc, ref asc, re_step asc))
+			where r >= #{startRow} and r <= #{endRow}
+		]]>
+	</select>
+	
+	<!-- 관리자 댓글 결과 수 -->
+	<select id="searchCommentCount" resultType="int">
+		select count(*) from tbl_notice_c where ${category} like '%'||#{input}||'%'
+	</select>
+</mapper>

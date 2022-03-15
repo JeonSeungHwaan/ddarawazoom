@@ -1,0 +1,14 @@
+@charset "UTF-8";
+
+  .hit {
+      animation-name: blink;
+      animation-duration: 1.5s;
+      animation-timing-function: ease;
+      animation-iteration-count: infinite;
+    }
+    
+    @keyframes blink {
+      from {color: white;}
+      30% {color: red;}
+      to {color: red; font-weight: bold;}
+    }

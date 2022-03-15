@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mvc.mybatis.ManagerMapper">
+
+	<!-- 등록 돼있는 모든 코치의 정보 -->
+	<select id="getAllCoachInfo" resultType="org.mvc.bean.CoachInfoDTO">
+		select * from tbl_coach
+	</select>
+
+	<!-- 등록 돼있는 모든 코치 수 -->
+	<select id="countAllCoach" resultType="Integer">
+		select count(*) from tbl_coach
+	</select>
+	
+	<!-- 코치 한 명의 정보 -->
+	<select id="coachInfo" resultType="org.mvc.bean.CoachInfoDTO">
+		select * from tbl_coach where c_id = #{c_id}
+	</select>
+	
+	<!-- 코치 한 명의 경력 정보 -->
+	<select id="coachCareer" resultType="org.mvc.bean.CoachCareerDTO">
+		select * from tbl_coach_career where c_id = #{c_id}
+	</select>
+	
+	<!-- 코치가 등록한 강의 정보 -->
+	<select id="getCoachClass" resultType="org.mvc.bean.ZoomDTO">
+		select * from tbl_coachClass where c_id = #{c_id}
+	</select>
+	
+	<!-- 코치 강의 삭제 -->
+	<update id="deleteClass">
+		update tbl_coachClass set
+			status = '삭제'
+		where num = #{num}
+	</update>
+	
+	<!-- 코치 강의 복구 -->
+	<update id="restoreClass">
+		update tbl_coachClass set
+			status = '등록'
+		where num = #{num}
+	</update>
+	
+	<!-- 코치 상태 변경 -->
+	<update id="changeStatus">
+		update tbl_coach set
+			c_status = #{c_status}
+		where c_id = #{c_id}
+	</update>
+
+	<!-- 전체 멤버 수 -->	
+	<select id="countAllUser" resultType="Integer">
+		select count(*) from tbl_user where status != '탈퇴'
+	</select>
+	
+	<!-- 멤버 한 명의 정보 -->
+	<select id="userInfo" resultType="org.mvc.bean.UserInfoDTO">
+		select * from tbl_user where id = #{id}
+	</select>
+	
+	<!-- 비밀번호 변경 -->
+	<update id="updateUserPw">
+		<![CDATA[
+			update tbl_user set pw = #{pw}
+				where id = #{id}
+		]]>
+	</update>
+	
+	<!-- 멤버 탈퇴 -->
+	<update id="userDelete">
+		update tbl_user set
+			status = '탈퇴'
+		where id = #{id}
+	</update>
+	
+	<!-- 일반 가입 멤버 리스트 -->
+	<select id="getUserInfo" resultType="org.mvc.bean.UserInfoDTO">
+		<![CDATA[
+			select * from tbl_user
+				where id not like'%kakaoLogin%'  and id not like '%naverLogin%' and status != '탈퇴'
+		]]>
+	</select>
+	
+	<!-- 일반 가입 멤버 수 -->
+	<select id="userCount" resultType="Integer">
+		select count(*) from tbl_user
+			where id not like'%kakaoLogin%'  and id not like '%naverLogin%' and status != '탈퇴'
+	</select>
+	
+	<!-- 오늘의 신규 가입자 리스트 -->
+	<select id="newUser" resultType="org.mvc.bean.UserInfoDTO">
+		<![CDATA[
+			select * from tbl_user
+				where TO_DATE(regdate, 'yyyy/mm/dd') = TO_DATE(sysdate, 'yyyy/mm/dd') and status != '탈퇴'
+		]]>
+	</select>
+	
+	<!-- 신규 가입자 수 -->
+	<select id="newUserCount" resultType="Integer">
+		<![CDATA[
+			select count(*) from tbl_user
+				where TO_DATE(regdate, 'yyyy/mm/dd') = TO_DATE(sysdate, 'yyyy/mm/dd') and status != '탈퇴'
+		]]>
+	</select>
+	
+	<!-- 탈퇴 멤버 리스트 -->
+	<select id="getDeleteUser" resultType="org.mvc.bean.UserInfoDTO">
+		select * from tbl_user
+			where status = '탈퇴'
+	</select>
+	
+	<!-- 탈퇴 멤버 수 -->
+	<select id="getDeleteUserCount" resultType="Integer">
+		select count(*) from tbl_user
+			where status = '탈퇴'
+  </select>
+
+	<!-- 카카오톡 회원가입 멤버 리스트 -->
+	<select id="getKakaoUser" resultType="org.mvc.bean.UserInfoDTO">
+		<![CDATA[
+			select * from tbl_user where id like '%kakaoLogin%' and status != '탈퇴'
+		]]>
+	</select>
+	
+	<!-- 카카오톡 회원가입 멤버 수 -->
+	<select id="kakaoUserCount" resultType="Integer">
+		<![CDATA[
+			select count(*) from tbl_user where id like '%kakaoLogin%' and status != '탈퇴'
+		]]>
+	</select>
+		
+	<!-- 네이버 회원가입 멤버 리스트 -->
+	<select id="getNaverUser" resultType="org.mvc.bean.UserInfoDTO">
+		<![CDATA[
+			select * from tbl_user where id like '%naverLogin%' and status != '탈퇴'
+		]]>
+	</select>
+	
+	<!-- 네이버 회원가입 멤버 수 -->
+	<select id="naverUserCount" resultType="Integer">
+		<![CDATA[
+			select count(*) from tbl_user where id like '%naverLogin%' and status != '탈퇴'
+		]]>
+	</select>
+	
+	<!-- 멤버 검색 리스트-->
+	<select id="searchUserList" resultType="org.mvc.bean.UserInfoDTO">
+		<![CDATA[
+			select * from (
+				select id, pw, email, regdate, img, status, nick, name, gender, birth, tel, temp_pw, rownum r from(
+					select * from tbl_user  where ${category} like '%'||#{input}||'%' order by id desc))
+			where r >= #{startRow} and r <= #{endRow}
+		]]>
+	</select>
+	
+	<!-- 검색 결과 수 -->
+	<select id="searchCount" resultType="int">
+		select count(*) from tbl_user where ${category} like '%'||#{input}||'%'
+	</select>
+
+	<!-- 관리자페이지 강의삭제 -->
+	<delete id="zoomClassDelete">
+		delete from tbl_coachclass where num = #{num} 
+	</delete> 
+	
+	<!-- 관리자페이지 검색된 게시물리스트 -->
+	<select id="zoomSearchList" resultType="org.mvc.bean.ZoomDTO">
+	<![CDATA[
+		select * from (
+			select num, c_id, title, intro, type, goal, tool, frequency, price, img, count, status, c_nick, rownum r from (
+				select * from tbl_coachclass where ${sort} like '%'||#{search}||'%' order by num desc))
+		where r >= #{startRow} and r <= #{endRow} and status = '등록'
+	]]>
+	</select>
+	
+	<!-- 관리자페이지 검색된 게시물수 -->
+	<select id="zoomSearchCount" resultType="int">
+		select count(*) from tbl_coachclass where status = '등록' and ${sort} like '%'||#{search}||'%'
+	</select>
+
+	<!-- Q&A 삭제 -->
+	<update id="deleteQnA">
+		update tbl_QnA set
+			status = '삭제'
+		where q_num = #{q_num}
+	</update>
+	
+	<!-- 상단 고정 여부 -->
+	<update id="pinUpdate">
+		update tbl_QnA set
+			pin = #{pin}
+		where q_num = #{q_num}
+	</update>
+	
+	<!-- 오늘의 방문자 수 -->
+	<select id="todayVisitorCount" resultType="int">
+		<![CDATA[
+			select count(*) from tbl_visitor where TO_DATE(v_date, 'yyyy/mm/dd') = TO_DATE(sysdate, 'yyyy/mm/dd')
+		]]>
+	</select>
+	
+	<!-- 일반 방문자 수 -->
+	<select id="visitorCount" resultType="int">
+		select count(*) from tbl_visitor
+				where id not like'%kakaoLogin%'  and id not like '%naverLogin%'
+	</select>
+	
+	<!-- 카카오톡 방문자 수 -->
+	<select id="kakaoVisitorCount" resultType="int">
+		select count(*) from tbl_visitor
+			where  id like '%kakaoLogin%'
+	</select>
+	
+	<!-- 네이버 방문자 수 -->
+	<select id="naverVisitorCount" resultType="int">
+		select count(*) from tbl_visitor
+			where  id like '%naverLogin%'
+	</select>
+	
+	<!-- 멤버 방문 수-->
+	<select id="memberVisitorCount" resultType="int">
+		select count(*) from tbl_visitor where id IS NOT NULL	
+	</select>
+	
+	<!-- 코치 방문 수 -->
+	<select id="coachVisitorCount" resultType="int">
+		select count(*) from tbl_visitor where c_id IS NOT NULL
+	</select>
+	
+	<!-- 총 누적 방문 수 -->
+	<select id="totalVisitorCount" resultType="int">
+		select count(*) from tbl_visitor
+	</select>
+	
+	<!-- 날짜 검색을 통행 로그인한 회원 리스트 -->
+	<select id="searchVisitorList" resultType="org.mvc.bean.VisitorDTO">
+		<![CDATA[
+			select * from tbl_visitor WHERE  TO_DATE(v_date ,'yy-mm-dd') = #{visitDate}
+		]]>
+	</select>
+	
+	<!-- 공지 글 가져오기 -->
+	<select id="noticeList" resultType="org.mvc.bean.NoticeDTO">
+		<![CDATA[
+			select * from tbl_notice order by pin desc , regdate desc
+		]]>
+	</select>
+	
+	<!-- 공지사항 댓글 리스트 -->
+	<select id="getCommentList" resultType="org.mvc.bean.Notice_CDTO">
+		<![CDATA[
+			select * from tbl_notice_c order by ref asc, re_step asc
+		]]>
+	</select>
+	
+	<select id="searchCommentList" resultType="org.mvc.bean.Notice_CDTO">
+		<![CDATA[
+			select * from tbl_notice_c where ${category} like '%'||#{input}||'%' order by ref asc, re_step asc
+		]]>
+	</select>
+	
+</mapper>

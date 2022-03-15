@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="org.mvc.mybatis.ZoomMapper"> 
+
+  	<!-- 강의페이지 리스트 -->
+	<select id="zoomList" resultType="org.mvc.bean.ZoomDTO">
+	<![CDATA[
+		select * from (
+			select num, c_id, title, intro, type, goal, tool, frequency, price, img, count, status, c_nick, rownum r from (
+				select * from tbl_coachclass order by num desc))
+		where r >= #{startRow} and r <= #{endRow} and status = '등록'
+	]]>
+	</select>
+	
+	<!-- 강의수 -->
+	<select id="zoomCount" resultType="int">
+		select count(*) from tbl_coachclass where status = '등록'
+	</select>
+	
+	<!-- 강의등록 -->
+	<insert id="zoomInsert" parameterType="org.mvc.bean.ZoomDTO">
+		insert into tbl_coachclass(num, c_id, title, intro, type, goal, tool, frequency, price, merchant_uid, c_nick) 
+			values(seq_coachclass.nextval, #{c_id}, #{title}, #{intro}, #{type}, #{goal}, #{tool}, #{frequency}, #{price}, #{merchant_uid}, #{c_nick})
+	</insert>
+	
+	<!-- 강의삭제 -->
+	<delete id="zoomDelete">
+		delete tbl_coachclass where num=#{num}
+	</delete>
+	
+	<!-- 강의수정 -->
+	<update id="zoomUpdate">
+		update tbl_coachclass set 
+			title=#{title},
+			intro=#{intro},
+			type=#{type},
+			goal=#{goal},
+			tool=#{tool},
+			frequency=#{frequency},
+			price=#{price}
+				where num=#{num}
+	</update> 
+	
+	<!-- 강의이미지수정 -->
+	<update id="imgUpdate">
+		update tbl_coachclass set
+			img=#{img}
+				where num=#{num}
+	</update>
+	
+	<!-- 조회수 -->
+	<update id="zoomReadcount">
+		update tbl_coachclass set
+			count = count+1
+				where num=#{num}
+	</update>
+	
+	<!-- 강의상세페이지 -->
+	<select id="zoomContent" resultType="org.mvc.bean.ZoomDTO"> 
+		select * from tbl_coachclass where num=#{num}
+	</select>
+	
+	<!-- 검색페이지 리스트 -->
+	<select id="searchList" resultType="org.mvc.bean.ZoomDTO">
+	<![CDATA[
+		select * from (
+			select num, c_id, title, intro, type, goal, tool, frequency, price, img, count, status, c_nick, rownum r from (
+				select * from tbl_coachclass where ${category} like '%'||#{input}||'%' order by num desc))
+		where r >= #{startRow} and r <= #{endRow} and status = '등록'
+	]]>
+	</select>
+	
+	<!-- 검색된 게시물수 -->
+	<select id="searchCount" resultType="int">
+		select count(*) from tbl_coachclass where status = '등록' and ${category} like '%'||#{input}||'%'
+	</select>
+	
+	<!-- 페이 관련 -->
+	<select id="getPrice" resultType="int">
+		select price from tbl_coachclass where MERCHANT_UID=#{merchant_Uid}
+	</select>
+
+	<!-- 강의상세페이지 후기리스트 -->
+	<select id="reviewList" resultType="org.mvc.bean.ReviewDTO">
+	<![CDATA[
+		select * from (
+			select review_num,class_num, id,nick,title,content, grade, deleted, rownum r from (
+				select * from tbl_review order by review_num desc))
+		where class_num = #{class_num} and r >= #{startRow} and r <= #{endRow}
+	]]>
+	</select>
+	
+	<!-- 강의상세페이지 후기등록 -->
+	<insert id="reInsert" parameterType="org.mvc.bean.ReviewDTO">
+		insert into tbl_review(review_num, class_num, id, nick, title, content, grade)
+			values(seq_review.nextval, #{class_num}, #{id},#{nick},#{title},#{content},#{grade})
+	</insert>
+	
+	<!-- 후기수 -->
+	<select id="reCount" resultType="int">
+		select count(*) from tbl_review where class_num=#{class_num}
+	</select> 
+	
+	<!-- 사용자정보 -->
+	<select id="getUserInfo" resultType="org.mvc.bean.UserInfoDTO">
+		select * from tbl_user where id = #{id}
+	</select>
+	
+</mapper>  

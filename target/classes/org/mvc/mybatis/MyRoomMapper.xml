@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.mvc.mybatis.MyRoomMapper">
+
+	<!-- 마이 프로필 데이터 가져오기 -->
+	<select id="getMyProfile" resultType="org.mvc.bean.UserInfoDTO">
+		select * from tbl_user where id = #{id}
+	</select>
+	
+	<!-- 최근 바디 프로필 데이터 가져오기 -->
+	<select id="getBodyProfile" resultType="org.mvc.bean.BodyProfileDTO">
+		select * from tbl_bodyprofile
+			where b_id = #{b_id} and b_num = (
+				select max(b_num) from tbl_bodyprofile where b_id = #{b_id}
+			)
+	</select>
+	
+	<!-- 바디 프로필 리스트 데이터 가져오기 -->
+	<select id="bodyList" resultType="org.mvc.bean.BodyProfileDTO">
+		<![CDATA[
+			select * from(
+				select b_num, b_id, b_height, b_weight, b_muscle, b_bodyfat, b_shape, b_chest, b_waist, b_arm, b_thigh, b_hip, b_date, b_img, rownum r from( 
+				 	select * from tbl_bodyprofile order by b_date asc, rownum desc))
+			 	where b_id = #{b_id}
+		]]>
+	</select>
+	
+	<!--  마이 프로필 수정 -->
+	<update id="myUpdate" parameterType="org.mvc.bean.UserInfoDTO">
+		<![CDATA[
+			update tbl_user set
+					name = #{name},
+					gender = #{gender},
+					birth = #{birth},
+					tel = #{tel},
+					email = #{email},
+					img = #{img}
+			where id = #{id}
+		]]>
+	</update>
+
+	<!-- 바디 프로필 작성 -->
+	<insert id="bodyWrite" parameterType="org.mvc.bean.BodyProfileDTO">
+		insert into tbl_bodyprofile(b_num, b_id, b_height, b_weight, b_muscle, b_bodyfat, b_shape, b_chest, b_waist, b_arm, b_thigh, b_hip, b_date, b_img)
+			values(
+				tbl_bodyprofile_seq.nextval,
+				#{b_id},
+				#{b_height},
+				#{b_weight},
+				#{b_muscle},
+				#{b_bodyfat},
+				#{b_shape},
+				#{b_chest},
+				#{b_waist},
+				#{b_arm},
+				#{b_thigh},
+				#{b_hip},
+				#{b_date},
+				#{b_img}
+			)
+	</insert>
+	
+	<!-- 수정에 필요한 바디 프로필 데이터 가져오기 -->
+	<select id="getBodyInfo" resultType="org.mvc.bean.BodyProfileDTO">
+		<![CDATA[
+			select * from tbl_bodyprofile where b_num = #{b_num} and b_id = #{b_id}
+		]]>
+	</select>
+	
+	<!-- 바디 프로필 수정 -->
+	<update id="bodyUpdate" parameterType="org.mvc.bean.BodyProfileDTO">
+		<![CDATA[
+			update tbl_bodyprofile set
+				b_height = #{b_height},
+				b_weight = #{b_weight},
+				b_muscle = #{b_muscle},
+				b_bodyfat = #{b_bodyfat},
+				b_shape = #{b_shape},
+				b_chest = #{b_chest},
+				b_waist = #{b_waist},
+				b_arm = #{b_arm},
+				b_thigh = #{b_thigh},
+				b_hip = #{b_hip},
+				b_date = #{b_date},
+				b_img = #{b_img}
+			where  b_num = #{b_num} and b_id = #{b_id}
+			]]>
+	</update>
+	
+	<!-- 바디 프로필 삭제 -->
+	<delete id="bodyDelete">
+		delete tbl_bodyprofile where b_num = #{b_num}
+	</delete>
+	
+	<!-- 멤버 정보 데이터 가져오기 -->
+	<select id="getUserInfo" resultType="org.mvc.bean.UserInfoDTO">
+		select * from tbl_user where id = #{id}
+	</select>
+	
+	<!-- 멤버 정보 수정 -->
+	<update id="updateInfo" parameterType="org.mvc.bean.UserInfoDTO">
+		<![CDATA[
+			update tbl_user set
+				pw = #{pw},
+				email = #{email},
+				nick = #{nick},
+				name = #{name},
+				gender = #{gender},
+				birth = #{birth},
+				tel = #{tel}
+			where id = #{id}
+		]]>
+	</update>
+	
+	<!-- 멤버 프로필 이미지 수정 -->
+	<update id ="updateImg">
+		<![CDATA[
+			update tbl_user set
+				img = #{img}
+			where id = #{id}			
+		]]>
+	</update>
+	
+	<!-- 탈퇴를 위한 패스워드 체크 -->
+	<select id="pwCheck" resultType="String">
+		select pw from tbl_user where id = #{id}
+	</select>
+	
+	<!-- 멤버 탈퇴 -->
+	<update id="statusChange">
+		update tbl_user set
+			status = '탈퇴'
+		where id = #{id}
+	</update>
+
+	<!-- 일정 관련 코드 -->
+	<resultMap type="org.mvc.bean.ScheduleDTO" id="calMap"> 
+		<result property="start" column="start_time"/> 
+		<result property="end" column="end_time"/> 
+	</resultMap>
+	
+	<!-- 일정 정보 가져오기 -->
+	<select id="getAllClass" resultMap="calMap" resultType="org.mvc.bean.ScheduleDTO">
+		select * from tbl_calendar where m_id = #{m_id}
+	</select>
+
+	<select id="countClassNum" resultType="Integer">
+		select count(*) from tbl_coachClass where title = #{title}
+	</select>
+
+	<select id="getClassNum" resultType="Integer">
+		select num from tbl_coachClass where title = #{title}
+	</select>
+
+	<!-- Zoom 관심등록 데이터 가져오기 -->
+	<select id="likeZoomList" resultType="org.mvc.bean.ZoomDTO">
+		<![CDATA[
+			select * from (
+	    		select
+	    			tbl_like.zoom_num,
+	    			tbl_like.id,
+	    			tbl_coachclass.num,
+	    			tbl_coachclass.img,
+	    			tbl_coachclass.c_id,
+	    			tbl_coachclass.title,
+	    			tbl_coachclass.intro,
+	    			tbl_coachclass.type,
+	    			tbl_coachclass.goal,
+	    			tbl_coachclass.tool,
+	    			tbl_coachclass.frequency,
+	    			tbl_coachclass.price
+	    		from tbl_coachclass, tbl_like
+			where tbl_coachclass.num = tbl_like.zoom_num) where id = #{id} order by num desc
+		]]>
+	</select>
+	
+	<!-- Zoom 관심 체크 여부 확인 -->
+	<select id="zoomLikeCheck" resultType="Integer">
+		select count(*) from tbl_like where id = #{id} and zoom_num = #{zoom_num} 
+	</select>
+	
+	<!-- Zoom 관심 등록 -->
+	<insert id="zoomLikeWrite" parameterType="org.mvc.bean.LikeDTO">
+		insert into tbl_like(id,zoom_num)
+			values(#{id},#{zoom_num})
+	</insert> 
+	
+	<!-- Zoom 관심 등록 해제 -->
+	<delete id="zoomLikeDelete">
+		delete from tbl_like where id = #{id} and zoom_num = #{zoom_num}
+	</delete>
+
+	<!-- Zoom 등록 갯수 -->
+	<select id="zoomLikeCount" resultType="int">
+		select count(zoom_num) from tbl_like where id = #{id}
+	</select>
+	
+	<!-- 작성한 리뷰 가져오기 -->
+	<select id="getReview" resultType="org.mvc.bean.ReviewDTO">
+		<![CDATA[
+			select * from(
+			    select class_num, review_num, id, nick, title, content, grade, deleted, rownum r from(
+			    select * from tbl_review order by review_num desc))
+			where id = #{id}
+		]]>	
+	</select>	
+	
+	<!-- 작성한 리뷰 갯수 -->
+	<select id="reviewCount" resultType="Integer">
+		select count(*) from tbl_review where id = #{id}
+	</select>
+	
+	<!-- 수정에 필요한 리뷰 데이터 가져오기 -->
+	<select id="getMyReview" resultType="org.mvc.bean.ReviewDTO">
+		select * from tbl_review where id = #{id} and review_num = #{review_num}	
+	</select>
+	
+	<!-- 리뷰 수정 -->
+	<update id="updateReview">
+		update tbl_review set
+			content = #{content},
+			grade = #{grade}
+		where id = #{id} and review_num = #{review_num}
+	</update>
+	
+	<!-- 리뷰 삭제 -->
+	<delete id="deleteReview">
+		delete tbl_review where id = #{id} and review_num = #{review_num}
+	</delete>
+
+	<!-- 결재 내역 가져오기 -->
+	<select id="getPayment" resultType="org.mvc.bean.PaymentDTO">
+		select * from tbl_payment
+			where buyerName = #{buyerName}
+	</select>
+</mapper>
