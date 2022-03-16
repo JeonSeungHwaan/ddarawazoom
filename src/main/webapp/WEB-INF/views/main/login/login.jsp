@@ -9,7 +9,7 @@
 <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
 <script src="/resources/user/custom/js/kakao.js" type="text/javascript"></script>
 
-<!-- 네이버 스크립트 (네이버 로그인 관련 스크립트 함수가 실행되는 파일 경로) -->
+<!-- 네이버 스크립트 -->
 <script src="https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js" charset="utf-8"></script>
 
 <div class="form-sigminbox text-center">
