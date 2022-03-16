@@ -1,3 +1,4 @@
+// 카카오 로그인 API 관련 스크립트 파일
 
 // 키를 발급받고 받은 키로 sdk 초기화 진행
 Kakao.init('fe7344bb892ab9d3081040d3d8b90568'); 
@@ -18,10 +19,12 @@ function kakaoLogin() {
 			var email = response.kakao_account.email; // 카카오 이메일
 			var kakaoImg = response.properties.profile_image; // 카카오 프로필 사진
 			
+		  	// 사용자의 카카오 회원 정보에 이메일 정보가 없을 때 이메일 정보 대신 문구를 DB에 저장하기 위함
 			if(email == undefined || email == null){
 				email = '이메일을 등록해주세요';
 			}
 			
+		  	// controller로 보낼 사용자 정보
 			var kakaoData = JSON.stringify({
 					'id' : id,
 					'nick' : nick,
@@ -29,7 +32,8 @@ function kakaoLogin() {
 					'img' : kakaoImg
 				})
 			
-        	$.ajax({
+			// 사용자의 정보를 controller로 보냄 
+        		$.ajax({
 				data : kakaoData,
 				url : "/ddarawazoom/kakaoLogin",
 				type : "POST",
