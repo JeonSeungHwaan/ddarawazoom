@@ -5,8 +5,9 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- 카카오 스크립트 (카카오 로그인 관련 스크립트 함수가 실행되는 파일 경로) -->
+<!-- 카카오 스크립트 -->
 <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+<!-- 카카오 로그인 관련 스크립트 함수가 실행되는 파일 경로 -->
 <script src="/resources/user/custom/js/kakao.js" type="text/javascript"></script>
 
 <!-- 네이버 스크립트 -->
