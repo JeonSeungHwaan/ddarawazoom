@@ -12,4 +12,4 @@
   - AOP를 활용한 세션 유효성 검사 기능
   - char.js를 활용한 바디프로필 페이지의 차트 기능
 
-<font size="10em">aaaa</font>
+<p style="font-size:10px">aaaa</p>
